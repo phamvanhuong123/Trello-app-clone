@@ -1,4 +1,6 @@
-import { Box } from "@mui/material";
+import Box from "@mui/material/Box";
+
+import ListColumns from "./ListColumns/ListColumns";
 
 function BoardContent() {
   return (
@@ -7,15 +9,15 @@ function BoardContent() {
         sx={{
           bgcolor: (theme) =>
             theme.palette.mode === "dark" ? "#34497e" : "#1976d2",
-          height: (theme) =>
-            `calc(100% - ${theme.trello.boardBarHeight} - ${theme.trello.appBarHeight})`,
+          height: (theme) => theme.trello.boarContentHeght,
           width: "100%",
-          display: "flex",
-          alignItems: "center",
+          padding: "10px 0",
         }}
       >
-        Board Content1
-      </Box>
+       
+          <ListColumns />
+        </Box>
+
     </>
   );
 }
