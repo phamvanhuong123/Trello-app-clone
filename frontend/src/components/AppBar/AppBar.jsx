@@ -16,7 +16,7 @@ import Avata from "../Avata";
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 
-function AppBar() {
+function AppBar({board}) {
   const [searchValue,setSearchValue] = useState('');
   return (
     <>

@@ -10,8 +10,8 @@ import Tooltip from "@mui/material/Tooltip";
 import Avatar from "@mui/material/Avatar";
 import AvatarGroup from "@mui/material/AvatarGroup";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
-
-function BoardBar() {
+import {capitalizeFirstLetter} from 'utils/formatter'
+function BoardBar({board}) {
   const menus = {
     color: "white",
     bgcolor: "transparent",
@@ -49,13 +49,13 @@ function BoardBar() {
         >
           <Chip
             icon={<SpaceDashboardIcon />}
-            label="Clone Trello app"
+            label={board.title}
             clickable
             sx={menus}
           />
           <Chip
             icon={<VpnLockIcon />}
-            label="Public/Private Workspace"
+            label={capitalizeFirstLetter(board.type)}
             clickable
             sx={menus}
           />

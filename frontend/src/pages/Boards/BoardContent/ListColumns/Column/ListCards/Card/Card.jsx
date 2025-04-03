@@ -7,8 +7,12 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Comment from "@mui/icons-material/Comment";
 import Group from "@mui/icons-material/Group";
-function Card ({cardMediaHide}){
-    if (cardMediaHide){
+function Card ({card}){
+    const shouldShowCardAction = ()=>{
+        return !!card?.memberIds.length || !!card?.comments?.length || !!card?.attachments?.length
+    }
+
+    if (!card?.cover){
         return <MuiCard
             sx={{
                 cursor: "pointer",
@@ -17,8 +21,19 @@ function Card ({cardMediaHide}){
             }}
             >
             <CardContent sx={{ p: 1.5, "&:last-child": { p: 1.5 } }}>
-                <Typography>Card 1</Typography>
+                <Typography>{card.title}</Typography>
             </CardContent>
+            {shouldShowCardAction() && <CardActions sx={{ p: "0 4px 8px 4px" }}>
+                <Button startIcon={<Group />} sx={{ fontWeight: "bold" }}>
+                {card?.memberIds.length}
+                </Button>
+                <Button startIcon={<Comment />} sx={{ fontWeight: "bold" }}>
+                {card?.comments?.length}
+                </Button>
+                <Button startIcon={<Attachment />} sx={{ fontWeight: "bold" }}>
+                {card?.attachments?.length}
+                </Button>
+            </CardActions>}
             </MuiCard>
        
     }
@@ -32,22 +47,22 @@ function Card ({cardMediaHide}){
             >
             <CardMedia
                 sx={{ height: 140 }}
-                image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTc9APxkj0xClmrU3PpMZglHQkx446nQPG6lA&"
+                image={card?.cover}
             />
             <CardContent sx={{ p: 1.5,"&:last-child": { p: 1.5 } }}>
-                <Typography component="div">Unt Pham</Typography>
+                <Typography component="div">{card.title}</Typography>
             </CardContent>
-            <CardActions sx={{ p: "0 4px 8px 4px" }}>
+            {shouldShowCardAction() && <CardActions sx={{ p: "0 4px 8px 4px" }}>
                 <Button startIcon={<Group />} sx={{ fontWeight: "bold" }}>
-                20
+                {card?.memberIds.length}
                 </Button>
                 <Button startIcon={<Comment />} sx={{ fontWeight: "bold" }}>
-                15
+                {card?.comments?.length}
                 </Button>
                 <Button startIcon={<Attachment />} sx={{ fontWeight: "bold" }}>
-                10
+                {card?.attachments?.length}
                 </Button>
-            </CardActions>
+            </CardActions>}
         </MuiCard>
     </>
 }

@@ -4,7 +4,7 @@ import Card from "./Card/Card";
 
 
 
-function ListCards(){
+function ListCards({cards}){
     return <>
     <Box
         sx={{
@@ -22,7 +22,9 @@ function ListCards(){
                         - ${theme.trello.columnFooterHeight})`,
         }}
       >
-        <Card />
+        {cards.map(card => <Card key={card._id} card={card}/> ) }
+        
+        {/* <Card cardMediaHide/>
         <Card cardMediaHide/>
         <Card cardMediaHide/>
         <Card cardMediaHide/>
@@ -32,8 +34,7 @@ function ListCards(){
         <Card cardMediaHide/>
         <Card cardMediaHide/>
         <Card cardMediaHide/>
-        <Card cardMediaHide/>
-        <Card cardMediaHide/>
+        <Card cardMediaHide/> */}
         
      
         
