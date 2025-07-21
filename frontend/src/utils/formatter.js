@@ -7,14 +7,24 @@ export const capitalizeFirstLetter = (val) => {
   /**
    * Example:
    */
-  const stringTest = 'phamvanhuong'
-  const capString = capitalizeFirstLetter(stringTest)
+  // const stringTest = 'phamvanhuong'
+  // const capString = capitalizeFirstLetter(stringTest)
   
-  console.log('stringTest:', stringTest)
-  console.log('capString:', capString)
+  // console.log('stringTest:', stringTest)
+  // console.log('capString:', capString)
   /**
    * Results:
    * 
    * stringTest: Of course, nothing changes =))
    * capString: Phamvanhuong
    */
+  export const genratePlaceholderCard = (column) =>{
+    return {
+      _id : `${column._id}-placeholder-card`,
+      boardId: column.boardId, 
+      columnId: column._id,
+       FE_PlaceholderCard : true 
+    }
+  }
+
+  

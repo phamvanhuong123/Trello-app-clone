@@ -22,6 +22,7 @@ import ListCards from "./ListCards/ListCards";
 import { mapOrder } from "utils/sort";
 import {useSortable} from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
+
 function Column({column}) {
   const {
     attributes,
@@ -29,7 +30,8 @@ function Column({column}) {
     setNodeRef,
     transform,
     transition,
-  } = useSortable({id: column._id, data : column});
+    isDragging
+  } = useSortable({id: column._id, data : {...column}});
 
   const dndKitColumnStyle = {
     // Nếu sử dụng Transform như doc thì sẽ lỗi kiểu stretch
@@ -37,6 +39,9 @@ function Column({column}) {
     // touchAction : "none", // Dành cho senser default dạng pointerSensor
     transform: CSS.Translate.toString(transform),
     transition,
+    // Chiều cao phải là 100% vì nếu không sẽ bị lỗi lúc kéo column ngắn qua một column dài rất khó chịu và {...listener} phải BOX
+    height : '100%',
+    opacity : isDragging ? 0.5 : undefined
   };
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -51,11 +56,8 @@ function Column({column}) {
   };
   
   return (
-    <>
+    <div  ref={setNodeRef} style={dndKitColumnStyle} {...attributes}>
       <Box
-          ref={setNodeRef} 
-          style={dndKitColumnStyle}
-          {...attributes}
            {...listeners}
           sx={{
             maxWidth: "300px",
@@ -164,7 +166,7 @@ function Column({column}) {
       </Box>
 
         </Box>
-    </>
+    </div>
   );
 }
 export default Column;
