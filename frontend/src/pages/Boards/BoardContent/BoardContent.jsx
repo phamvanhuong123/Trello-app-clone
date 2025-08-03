@@ -103,6 +103,7 @@ function BoardContent({ board }) {
       const nextActiveCloumn = nextColumn.find(
         (column) => column._id === activeColumn._id
       );
+      
       const nextOverCloumn = nextColumn.find(
         (column) => column._id === overColumn._id
       );
@@ -154,7 +155,7 @@ function BoardContent({ board }) {
   }
   // Khi bắt đầu hành động kéo
   const handleDragStart = (event) => {
-    // console.log("handleDragStart : ",event)
+    console.log("handleDragStart : ",event)
     setActiveDragItemId(event?.active?.id);
     setActiveDragItemType(
       event?.active?.data?.current?.columnId
@@ -195,6 +196,7 @@ function BoardContent({ board }) {
     // Khi kéo card qua 2 column khác nhau mới xử lí
     if (activeColumn._id !== overColumn._id) {
       // console.log("code chạy vào đây")
+      console.log("abc : ",activeColumn)
       moveCardBetweenDifferentColumns(overColumn,
         overCardId,
         active,
@@ -237,6 +239,15 @@ function BoardContent({ board }) {
       // Phai dung toi oldColumnWhenDraggingCard._id hoac activeDragItemData.columnId (set state từ bước handleStartDrag) chứ không phải activeData trong scope handleDragEnd này vì sau khi đi qua dragOver  là state của card đã được cật nhật
       if (oldColumnWhenDraggingCard._id !== overColumn._id){
         console.log("dang keo card trong khac column")
+        console.log("oldColumnWhenDraggingCard : ",oldColumnWhenDraggingCard)
+        console.log("overColumn : ",overColumn)
+        console.log("overCardId : ",overCardId)
+        console.log("active : ",active)
+        console.log("over : ",over)
+        console.log("activeColumn : ",activeColumn)
+        console.log("activeDraggingCardId : ",activeDraggingCardId)
+        console.log("activeDraggingCardData : ",activeDraggingCardData)
+
         moveCardBetweenDifferentColumns(
           overColumn,
           overCardId,
@@ -248,7 +259,7 @@ function BoardContent({ board }) {
 
       }
       else{
-        console.log("Keos tha card cung column");
+        // console.log("Keos tha card cung column");
 
         // Lấy vị trí cũ (từ thằng oldColumnWhenDraggingCard)
         const oldCardIndex = oldColumnWhenDraggingCard?.cards.findIndex((c) => c._id === activeDragItemId);
@@ -256,14 +267,14 @@ function BoardContent({ board }) {
 
         // dùng arrayMove vì kéo card trong 1 column cũng tương tự logic kéo column trong boardContent
         const dndOrderedCard = arrayMove(oldColumnWhenDraggingCard?.cards,oldCardIndex,newCardIndex);
-        console.log("dndOrderedCard : ",dndOrderedCard)
+        // console.log("dndOrderedCard : ",dndOrderedCard)
         setOrderedColumn((prevColumns) => {
            // Clone mảng OrderedColumnState cũ ra một cái mới để xử lí data rồi return - cật nhật lại orderedColumnState mới
             const nextColumn = cloneDeep(prevColumns);
 
             // Tìm tới column mà hiện tại đang kéo thả
             const targetColumn = nextColumn.find(c => c._id === overColumn._id);
-            console.log("targetColumn",targetColumn)
+            // console.log("targetColumn",targetColumn)
             // Cật nhật lại 2 giá trị mới là card và cardOrderIds trong cái targetColumn
             targetColumn.cards = dndOrderedCard;
             targetColumn.cardOrderIds = dndOrderedCard.map(card => card._id);
@@ -311,7 +322,7 @@ function BoardContent({ board }) {
     } 
     //Tìm các điểm giao nhau, va chạm - intersections với con trỏ
     const pointerIntersections = pointerWithin(args);
-    console.log("pointerIntersections : ",pointerIntersections)
+    // console.log("pointerIntersections : ",pointerIntersections)
     //Fix triệt để bug flickering của thư viện trong trường hợp sau
     //Kéo một card chứa image và kéo lên  phía trên khỏi khu vực kéo thả.
     if(!pointerIntersections?.length) return;
