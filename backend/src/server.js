@@ -3,14 +3,17 @@
 import express from 'express'
 import exitHook from 'async-exit-hook'
 import { CONNECT_DB, CLOSED_DB } from '~/config/mongodb'
-
-
+import { APIs_V1 } from '~/routes/v1'
+import { errorHandlingMiddleware } from './middlewares/errorHandlingMiddleware'
 const START_SERVER = () => {
   const app = express()
   const port = 8071
-  app.get('/', async (req, res) => {
-    res.send('ádsad')
-  })
+  // enable req.body json data
+  app.use(express.json())
+  //use api/v1
+  app.use('/v1', APIs_V1)
+  // middleware xử lí lỗi tập trung
+  app.use(errorHandlingMiddleware)
   app.listen(port, () => {
     console.log(`Listen port :http://localhost:${port}`)
   })
