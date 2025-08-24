@@ -10,8 +10,8 @@ import Tooltip from "@mui/material/Tooltip";
 import Avatar from "@mui/material/Avatar";
 import AvatarGroup from "@mui/material/AvatarGroup";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
-import {capitalizeFirstLetter} from 'utils/formatter'
-function BoardBar({board}) {
+import { capitalizeFirstLetter } from "utils/formatter";
+function BoardBar({ board }) {
   const menus = {
     color: "white",
     bgcolor: "transparent",
@@ -35,10 +35,10 @@ function BoardBar({board}) {
           alignItems: "center",
           justifyContent: "space-between",
           px: 2,
-         
+
           overflowX: "auto",
           bgcolor: (theme) =>
-            theme.palette.mode === "dark" ? "#34497e" : "#1976d2"
+            theme.palette.mode === "dark" ? "#34497e" : "#1976d2",
         }}
       >
         <Box
@@ -47,15 +47,17 @@ function BoardBar({board}) {
             gap: 2,
           }}
         >
-          <Chip
-            icon={<SpaceDashboardIcon />}
-            label={board.title}
-            clickable
-            sx={menus}
-          />
+          <Tooltip title={board?.description}>
+            <Chip
+              icon={<SpaceDashboardIcon />}
+              label={board?.title}
+              clickable
+              sx={menus}
+            />
+          </Tooltip>
           <Chip
             icon={<VpnLockIcon />}
-            label={capitalizeFirstLetter(board.type)}
+            label={capitalizeFirstLetter(board?.type)}
             clickable
             sx={menus}
           />
@@ -73,8 +75,8 @@ function BoardBar({board}) {
             startIcon={<GroupAddIcon />}
             sx={{
               fontWeight: 600,
-              color : 'white',
-              borderColor : 'white'
+              color: "white",
+              borderColor: "white",
             }}
             variant="outlined"
           >
@@ -84,12 +86,11 @@ function BoardBar({board}) {
             max={5}
             total={10}
             sx={{
-              gap : '10px',
+              gap: "10px",
               ".MuiAvatar-root": {
-                width : 34,
-                height : 34,
-                border : "none"
-                
+                width: 34,
+                height: 34,
+                border: "none",
               },
             }}
           >

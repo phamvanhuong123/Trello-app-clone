@@ -4,8 +4,8 @@ import {
   DndContext,
   useSensor,
   useSensors,
-  TouchSensor,
-  MouseSensor,
+  // TouchSensor,
+  // MouseSensor,
   DragOverlay,
   defaultDropAnimationSideEffects,
   closestCorners,
@@ -20,7 +20,7 @@ import { arrayMove } from "@dnd-kit/sortable";
 import Column from "./ListColumns/Column/Column";
 import Card from "./ListColumns/Column/ListCards/Card/Card";
 import { genratePlaceholderCard } from "utils/formatter";
-
+import { MouseSensor, TouchSensor} from 'customLibraries/dndKitSensors'
 const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: "ACTIVE_DRAG_ITEM_TYPE_COLUMN",
   CARD: "ACTIVE_DRAG_ITEM_TYPE_CARD",
