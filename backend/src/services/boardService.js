@@ -14,7 +14,8 @@ const createNew = async (reqBody) => {
     const getNewBoard = await boardModel.findOneById(createdBoard.insertedId)
     return getNewBoard
   } catch (error) {
-    return error
+    throw new Error(error)
+
   }
 }
 
@@ -32,7 +33,8 @@ const getDetails = async (id) => {
     })
     delete resBoard.cards
     return resBoard
-  } catch (error) { throw error }
+  } catch (error) { throw new Error(error)
+ }
 }
 export const boardService = {
   createNew,

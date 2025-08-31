@@ -6,6 +6,8 @@
 
 import Joi from 'joi'
 import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from './validators'
+import { GET_DB } from '~/config/mongodb'
+import { ObjectId } from 'mongodb'
 
 // Define Collection (name & schema)
 const COLUMN_COLLECTION_NAME = 'columns'
@@ -23,7 +25,45 @@ const COLUMN_COLLECTION_SCHEMA = Joi.object({
   _destroy: Joi.boolean().default(false)
 })
 
+const validateCreateColumn = async (data) => {
+  return await COLUMN_COLLECTION_SCHEMA.validateAsync(data, { abortEarly : false })
+}
+const createNew = async (data) => {
+  try {
+    const validateData = await validateCreateColumn(data)
+    const newColumToAdd = {
+      ...validateData,
+      boardId : new ObjectId(String(validateData.boardId))
+
+    }
+    const createNewColumn = await GET_DB().collection(COLUMN_COLLECTION_NAME).insertOne(newColumToAdd)
+    return createNewColumn
+  }
+  catch (error) { throw new Error(error) }
+}
+const findOneById = async (id) => {
+  try {
+    const result = await GET_DB().collection(COLUMN_COLLECTION_NAME).findOne({ _id :new ObjectId(String(id)) })
+    return result
+  }
+  catch (error) { throw new Error(error) }
+}
+
+const pushCardOrderIds = async (card) => {
+  try {
+    const result = await GET_DB().collection(COLUMN_COLLECTION_NAME).findOneAndUpdate(
+      { _id : card.columnId },
+      { $push : { cardOrderIds : card._id } },
+      { returnDocument : 'after' }
+    )
+    return result || null
+  }
+  catch (error) {throw new Error(error)}
+}
 export const columnModel = {
   COLUMN_COLLECTION_NAME,
-  COLUMN_COLLECTION_SCHEMA
+  COLUMN_COLLECTION_SCHEMA,
+  createNew,
+  findOneById,
+  pushCardOrderIds
 }

@@ -2,7 +2,7 @@ import Joi from 'joi'
 import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from './validators'
 import { GET_DB } from '~/config/mongodb'
 import { BOARD_TYPES } from '~/utils/constants'
-import { ObjectId } from 'mongodb'
+import { ObjectId, ReturnDocument } from 'mongodb'
 import { cardModel } from './cardModel'
 import { columnModel } from './columnModel'
 // define Collection (Name & Schema)
@@ -44,7 +44,7 @@ const getDetails = async (id) => {
   try {
     const result = await GET_DB().collection(BOARD_COLLECTION_NAME).aggregate([
       {
-        $match  : { _id :new ObjectId(String(id)), _destroy : false } ,
+        $match  : { _id :new ObjectId(String(id)), _destroy : false }
       },
       {
         $lookup : {
@@ -67,12 +67,26 @@ const getDetails = async (id) => {
   }
   catch (error) { throw new Error(error) }
 }
+
+// Thêm id của column vào trường OrderColumnIds
+const pushColumnOrderIds = async(column) => {
+  try {
+    const result = await GET_DB().collection(BOARD_COLLECTION_NAME).findOneAndUpdate(
+      { _id : column.boardId },
+      { $push : { columnOrderIds : new ObjectId(String(column._id)) } },
+      { returnDocument : 'after' }
+    )
+    return result || null
+  }
+  catch (error) { throw new Error(error) }
+}
 export const boardModel = {
   BOARD_COLLECTION_NAME,
   BOARD_COLLECTION_SCHEMA,
   createNew,
   findOneById,
   validateCreateBoard,
-  getDetails
+  getDetails,
+  pushColumnOrderIds
 }
 // 68a085e73594206b22a61834
