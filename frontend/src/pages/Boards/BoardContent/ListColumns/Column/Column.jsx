@@ -19,13 +19,11 @@ import Button from "@mui/material/Button";
 import Attachment from "@mui/icons-material/Attachment";
 import ListCards from "./ListCards/ListCards";
 import CloseIcon from "@mui/icons-material/Close";
-
-import { mapOrder } from "utils/sort";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { TextField } from "@mui/material";
 
-function Column({ column }) {
+function Column({ column,createNewCard }) {
   const {
     attributes,
     listeners,
@@ -48,7 +46,7 @@ function Column({ column }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
-  const orderCard = mapOrder(column?.cards, column?.cardOrderIds, "_id");
+  const orderCard = column.cards
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -63,9 +61,15 @@ function Column({ column }) {
   const toggleOpenNewCard = () => {
     setOpenNewCardForm(!openNewCardForm);
   };
-  const addNewCard = () => {
+  const addNewCard = async () => {
     if (!openNewCardForm) return;
 
+    const newCardData = {
+      title : newCardTitile,
+      columnId : column._id
+    }
+
+    await createNewCard(newCardData)
     setNewCardTitle("");
     toggleOpenNewCard();
   };

@@ -11,19 +11,23 @@ import { useState } from "react";
 import { TextField } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
-function ListColumns({ columns }) {
+function ListColumns({ columns, createNewColumn, createNewCard }) {
   const [openNewColumnForm, setOpenNewColumnForm] = useState(false);
   const [newColumnTitile, setNewColumnTitle] = useState("");
   const toggleOpenNewColumn = () => {
     setOpenNewColumnForm(!openNewColumnForm);
   };
-  const addNewColumn = () => {
+  const addNewColumn = async () => {
     if (!newColumnTitile) {
       // console.error("Khong co gia tri")
       return;
     }
-    console.log(newColumnTitile);
+    // Tạo dữ liệu để gọi api
+    const newColumnData = {
+      title: newColumnTitile,
+    };
     // Goi api o day
+    await createNewColumn(newColumnData);
     toggleOpenNewColumn();
     setNewColumnTitle("");
   };
@@ -47,7 +51,11 @@ function ListColumns({ columns }) {
         }}
       >
         {columns?.map((column) => (
-          <Column key={column?._id} column={column} />
+          <Column
+            key={column?._id}
+            column={column}
+            createNewCard={createNewCard}
+          />
         ))}
         {/* <Column />
         <Column />
@@ -105,7 +113,6 @@ function ListColumns({ columns }) {
                 "& input": { color: "white" },
                 "& label.Mui-focused": { color: "white" },
                 "& .MuiOutlinedInput-root": {
-                  px: 1,
                   "& fieldset": { borderColor: "white" },
                   "&:hover fieldset": { borderColor: "white" },
                   "&.Mui-focused fieldset": { borderColor: "white" },
