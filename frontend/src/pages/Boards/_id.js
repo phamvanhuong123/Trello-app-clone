@@ -13,9 +13,13 @@ import {
   createNewCardApi,
   updateBoardDetailsAPIs,
   updateColumnDetailsAPIs,
+  moveCardDifferentColumnApi,
+  deleteColumnDetailAPIs,
 } from "apis/index";
 import { genratePlaceholderCard } from "utils/formatter";
 import { isEmpty } from "lodash";
+import { toast } from "react-toastify";
+
 function Board() {
   const [board, setboard] = useState(null);
 
@@ -71,8 +75,11 @@ function Board() {
     const createdCard = await createNewCardApi({
       ...newCardData,
       boardId: board._id,
-    });
+    }).then().catch(()=>{
+      toast.error("THêm thất bại")
+    })
     console.log("createdCard : ", createdCard);
+   
     // Cật nhật lại state Board
 
     const newBoard = { ...board };
@@ -80,8 +87,14 @@ function Board() {
       (column) => column._id === createdCard?.data.columnId
     );
     if (columnToUpdate) {
-      columnToUpdate.cards.push(createdCard?.data);
-      columnToUpdate.cardOrderIds.push(createdCard?.data?._id);
+      // Nếu card là rỗng thì column mặc định sẽ có một card-placeorder
+      if (columnToUpdate.cards.some((card) => card.FE_PlaceholderCard)) {
+        columnToUpdate.cards = [createdCard?.data];
+        columnToUpdate.cardOrderIds = [createdCard?.data?._id];
+      } else {
+        columnToUpdate.cards.push(createdCard?.data);
+        columnToUpdate.cardOrderIds.push(createdCard?.data?._id);
+      }
     }
     setboard(newBoard);
   };
@@ -115,13 +128,65 @@ function Board() {
       columnToUpdate.cardOrderIds = dndOrderedCardIds;
     }
     // Gọi api Update board
-    updateColumnDetailsAPIs(columnId, {cardOrderIds : dndOrderedCardIds})
+    updateColumnDetailsAPIs(columnId, { cardOrderIds: dndOrderedCardIds });
   };
-  if(!board){
-    return <Box>Loading....</Box>
+  // Khi di chuyển card khác column
+  // b1 : Cật nhật lại mảng cardOrderIds của column ban đầu đang kéo => xoá card._id trong đó và card
+  // b2 : Cật nhật lại mảng cardOrderIds của column đã kéo card tới => thêm card._id vào đúng vị trí và card
+  // b3 : Cật nhật lại columnId của card đang kéo
+  const moveCardDifferentColumn = (
+    currentCardId,
+    prevColumnId,
+    nextColumnId,
+    dndOrderedColumn
+  ) => {
+    const dndOrderedColumnIds = dndOrderedColumn.map((c) => c._id);
+    const newBoard = { ...board };
+    newBoard.columns = dndOrderedColumn;
+    newBoard.columnOrderIds = dndOrderedColumnIds;
+
+    setboard(newBoard);
+
+    // Gọi API xử lí bên backend
+
+    // Xử lí frontend gửi lên card rỗng (Khi kéo column không còn card thì sẽ là PlaceholderCard)
+    let prevCardOrderIds = dndOrderedColumn.find(
+      (c) => prevColumnId === c._id
+    )?.cardOrderIds;
+    if (prevCardOrderIds[0].includes("placeholder-card")) prevCardOrderIds = [];
+    moveCardDifferentColumnApi({
+      currentCardId,
+      prevColumnId,
+      prevCardOrderIds,
+      nextColumnId,
+      nextCardOrderIds: dndOrderedColumn.find((c) => nextColumnId === c._id)
+        ?.cardOrderIds,
+    });
+  };
+
+  // Xoá card and hoặc column
+  const deleteColumnDetails = (columnId) => {
+    // Xoá column trên UI
+    const newBoard = {...board}
+    newBoard.columns = newBoard.columns.filter(c => c._id !== columnId)
+    newBoard.columnOrderIds =  newBoard.columnOrderIds.map(c => c !== columnId)
+     setboard(newBoard)
+
+    deleteColumnDetailAPIs(columnId).then((res) =>{
+      toast.success(res?.message)
+      
+    }).catch(()=>{})
+  };
+
+  if (!board) {
+    return <Box>Loading....</Box>;
   }
+
   return (
+
     <Container disableGutters maxWidth="false" sx={{ height: "100vh" }}>
+    
+
       <AppBar />
       <BoardBar board={board} />
       <BoardContent
@@ -130,8 +195,10 @@ function Board() {
         createNewCard={createNewCard}
         moveColumns={moveColumns}
         moveCardSameColumn={moveCardSameColumn}
+        moveCardDifferentColumn={moveCardDifferentColumn}
+        deleteColumnDetails={deleteColumnDetails}
       />
     </Container>
-  );
+  )
 }
 export default Board;

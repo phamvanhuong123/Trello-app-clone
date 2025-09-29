@@ -4,16 +4,21 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import CssBaseline from "@mui/material/CssBaseline";
-import {ThemeProvider} from '@mui/material/styles';
+import { ThemeProvider } from "@mui/material/styles";
 
 import theme from "./theme";
+import { ToastContainer } from "react-toastify";
+import { ConfirmProvider } from "material-ui-confirm";
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <>
     <ThemeProvider theme={theme}>
-      <CssBaseline />
-   
-      <App />
+      <ConfirmProvider>
+        <CssBaseline />
+        <App />
+        <ToastContainer position="bottom-left" theme="colored" autoClose={2000} />
+      </ConfirmProvider>
       
     </ThemeProvider>
   </>

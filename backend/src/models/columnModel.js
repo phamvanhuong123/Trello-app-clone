@@ -61,6 +61,8 @@ const pushCardOrderIds = async (card) => {
   }
   catch (error) {throw new Error(error)}
 }
+
+
 const update = async (id, updateData) => {
   try {
 
@@ -70,6 +72,10 @@ const update = async (id, updateData) => {
         delete updateData[fieldName]
       }
     })
+    // Nếu là dữ liệu liên quan đến ObjectId thì biến đổi
+    if (updateData.cardOrderIds) {
+      updateData.cardOrderIds = updateData.cardOrderIds.map(id => new ObjectId(String(id)))
+    }
     const result = await GET_DB().collection(COLUMN_COLLECTION_NAME).findOneAndUpdate(
       { _id : new ObjectId(String(id)) },
       { $set : updateData },
@@ -79,11 +85,20 @@ const update = async (id, updateData) => {
   }
   catch (error) { throw new Error(error) }
 }
+
+const deleteOneById = async (id) => {
+  try {
+    const result = await GET_DB().collection(COLUMN_COLLECTION_NAME).deleteOne({ _id :new ObjectId(String(id)) })
+    return result
+  }
+  catch (error) { throw new Error(error) }
+}
 export const columnModel = {
   COLUMN_COLLECTION_NAME,
   COLUMN_COLLECTION_SCHEMA,
   createNew,
   findOneById,
   pushCardOrderIds,
-  update
+  update,
+  deleteOneById
 }
