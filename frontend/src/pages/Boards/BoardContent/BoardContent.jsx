@@ -23,7 +23,14 @@ const ACTIVE_DRAG_ITEM_TYPE = {
   COLUMN: "ACTIVE_DRAG_ITEM_TYPE_COLUMN",
   CARD: "ACTIVE_DRAG_ITEM_TYPE_CARD",
 };
-function BoardContent({ board, createNewColumn, createNewCard, moveColumns,moveCardSameColumn }) {
+function BoardContent({ 
+  board,
+  createNewColumn,
+  createNewCard,
+  moveColumns,
+  moveCardSameColumn,
+  moveCardDifferentColumn,
+  deleteColumnDetails }) {
   // Yêu cầu chuột di chuyển 10px mới bắt sự kiện onDragEnd,fix cái trường chỉ click gọi event
   // Nếu dùng pointerSensor thì phải dùng với touch-action : 'none' ở những component kéo thả
   // const pointerSenser = useSensor(PointerSensor,{
@@ -75,7 +82,8 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumns,moveC
     over,
     activeColumn,
     activeDraggingCardId,
-    activeDraggingCardData
+    activeDraggingCardData,
+    triggerFrom
   ) => {
     setOrderedColumn((prevColumns) => {
       // Tìm index của overCard trong column đích(nơi activeCard sẽ được thả)
@@ -150,6 +158,13 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumns,moveC
         );
       }
       console.log("nextColumn : ", nextColumn);
+      
+      // Nếu function này được gọi từ handleDragEnd thì gọi api
+      if(triggerFrom === 'handleDragEnd'){
+        // call api
+        // Phải dùng tới activeDragItemData.columnId hoặc oldColumnWhenDraggingCard._id (set vào state từ bước handleStart ) chứ không phải activeData trong scope handleDragend này vì sau khi đi qua onDragOver và tới đây state của card đã bị cật nhật một lần rồi.
+        moveCardDifferentColumn(activeDraggingCardId,oldColumnWhenDraggingCard._id,nextOverCloumn._id,nextColumn)
+      }
       return nextColumn;
     });
   };
@@ -205,7 +220,8 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumns,moveC
         over,
         activeColumn,
         activeDraggingCardId,
-        activeDraggingCardData
+        activeDraggingCardData,
+        'handleDragOver'
       );
     }
   };
@@ -259,7 +275,8 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumns,moveC
           over,
           activeColumn,
           activeDraggingCardId,
-          activeDraggingCardData
+          activeDraggingCardData,
+          'handleDragEnd'
         );
       } else {
         // console.log("Keos tha card cung column");
@@ -408,6 +425,7 @@ function BoardContent({ board, createNewColumn, createNewCard, moveColumns,moveC
           columns={orderedColumn}
           createNewColumn={createNewColumn}
           createNewCard={createNewCard}
+          deleteColumnDetails={deleteColumnDetails}
         />
         <DragOverlay dropAnimation={dropAnimation}>
           {!activeDragItemType && null}

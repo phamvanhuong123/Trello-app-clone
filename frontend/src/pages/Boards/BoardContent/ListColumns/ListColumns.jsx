@@ -11,7 +11,7 @@ import { useState } from "react";
 import { TextField } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
-function ListColumns({ columns, createNewColumn, createNewCard }) {
+function ListColumns({ columns, createNewColumn, createNewCard,deleteColumnDetails }) {
   const [openNewColumnForm, setOpenNewColumnForm] = useState(false);
   const [newColumnTitile, setNewColumnTitle] = useState("");
   const toggleOpenNewColumn = () => {
@@ -55,6 +55,7 @@ function ListColumns({ columns, createNewColumn, createNewCard }) {
             key={column?._id}
             column={column}
             createNewCard={createNewCard}
+            deleteColumnDetails={deleteColumnDetails}
           />
         ))}
         {/* <Column />

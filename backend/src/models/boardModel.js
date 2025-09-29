@@ -82,6 +82,19 @@ const pushColumnOrderIds = async(column) => {
   catch (error) { throw new Error(error) }
 }
 
+// Xoá id của column vào trường OrderColumnIds
+const pullColumnOrderIds = async(column) => {
+  try {
+    const result = await GET_DB().collection(BOARD_COLLECTION_NAME).findOneAndUpdate(
+      { _id : column.boardId },
+      { $pull : { columnOrderIds : new ObjectId(String(column._id)) } },
+      { returnDocument : 'after' }
+    )
+    return result || null
+  }
+  catch (error) { throw new Error(error) }
+}
+
 const update = async (id, updateData) => {
   try {
 
@@ -91,6 +104,9 @@ const update = async (id, updateData) => {
         delete updateData[fieldName]
       }
     })
+    if (updateData.columnOrderIds) {
+      updateData.columnOrderIds = updateData.columnOrderIds.map(id => new ObjectId(String(id)))
+    }
     const result = await GET_DB().collection(BOARD_COLLECTION_NAME).findOneAndUpdate(
       { _id : new ObjectId(String(id)) },
       { $set : updateData },
@@ -109,6 +125,7 @@ export const boardModel = {
   validateCreateBoard,
   getDetails,
   pushColumnOrderIds,
-  update
+  update,
+  pullColumnOrderIds
 }
 // 68a085e73594206b22a61834

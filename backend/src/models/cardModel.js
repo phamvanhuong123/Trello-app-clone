@@ -22,6 +22,7 @@ const CARD_COLLECTION_SCHEMA = Joi.object({
   updatedAt: Joi.date().timestamp('javascript').default(null),
   _destroy: Joi.boolean().default(false)
 })
+const INVALID_UPDATE_FIELDS = ['_id', 'createdAt', 'boardId']
 
 
 const validateCreateCard = async (data) => {
@@ -48,9 +49,41 @@ const findOneById = async (id) => {
   }
   catch (error) { throw new Error(error) }
 }
+
+const update = async (id, updateData) => {
+  try {
+
+    // Xoá bỏ những trường không cần thay đổi
+    Object.keys(updateData).forEach(fieldName => {
+      if (INVALID_UPDATE_FIELDS.includes(fieldName)) {
+        delete updateData[fieldName]
+      }
+    })
+    // Đối với dữ liệu liên quan đến ObjectId thì biến đổi ở đay
+    if (updateData.columnId) updateData.columnId = new ObjectId(String(updateData.columnId))
+    const result = await GET_DB().collection(CARD_COLLECTION_NAME).findOneAndUpdate(
+      { _id : new ObjectId(String(id)) },
+      { $set : updateData },
+      { returnDocument : 'after' }
+    )
+    return result || null
+  }
+  catch (error) { throw new Error(error) }
+}
+
+
+const deleteManyByColumnId = async (columnId) => {
+  try {
+    const result = await GET_DB().collection(CARD_COLLECTION_NAME).deleteMany({ columnId :new ObjectId(String(columnId)) })
+    return result
+  }
+  catch (error) { throw new Error(error) }
+}
 export const cardModel = {
   CARD_COLLECTION_NAME,
   CARD_COLLECTION_SCHEMA,
   createNew,
-  findOneById
+  findOneById,
+  update,
+  deleteManyByColumnId
 }

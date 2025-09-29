@@ -31,7 +31,7 @@ const createNew = async (req, res, next) => {
 }
 
 const update = async (req, res, next) => {
-  // Không dùng require trong trường hợp upadte 
+  // Không dùng require trong trường hợp upadte
   const correctCondition = Joi.object({
     title : Joi.string().min(3).max(50).trim().strict(),
     description : Joi.string().min(3).max(256).trim().strict(),
@@ -48,7 +48,27 @@ const update = async (req, res, next) => {
     next(customError)
   }
 }
+const moveCardDifferentColumn = async (req, res, next) => {
+  const correctCondition = Joi.object({
+    currentCardId : Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
+    prevColumnId : Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
+    nextColumnId : Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
+    prevCardOrderIds : Joi.array().required().items(Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)),
+    nextCardOrderIds : Joi.array().required().items(Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE))
+  })
+  try {
+    await correctCondition.validateAsync(req.body, { abortEarly : false })
+    next()
+  } catch (error) {
+    // console.log(error)
+    const errorMessage = new Error(error).message
+    const customError = new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, errorMessage)
+    next(customError)
+  }
+}
+
 export const boardValidation = {
   createNew,
-  update
+  update,
+  moveCardDifferentColumn
 }
