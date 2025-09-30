@@ -7,6 +7,7 @@ import { CONNECT_DB, CLOSED_DB } from '~/config/mongodb'
 import { APIs_V1 } from '~/routes/v1'
 import { errorHandlingMiddleware } from './middlewares/errorHandlingMiddleware'
 import { corsOptions } from '~/config/cors'
+import { env } from './config/environment'
 const START_SERVER = () => {
   const app = express()
   // xu li cors
@@ -18,9 +19,17 @@ const START_SERVER = () => {
   app.use('/v1', APIs_V1)
   // middleware xử lí lỗi tập trung
   app.use(errorHandlingMiddleware)
-  app.listen(port, () => {
-    console.log(`Listen port :http://localhost:${port}`)
-  })
+
+  if (env.BUILD_MODE === 'production') {
+    app.listen(process.env.PORT, () => {
+      console.log(`Listen production :http://localhost:${process.env.PORT}`)
+    })
+  }
+  else {
+    app.listen(port, () => {
+      console.log(`Listen port :http://localhost:${port}`)
+    })
+  }
   // Thực hiện các tác vụ cleanup trước khi dừng server
   exitHook(() => {
     console.log('closed disconnected mongoDB alast')
