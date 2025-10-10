@@ -23,7 +23,15 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { TextField } from "@mui/material";
 import { useConfirm } from "material-ui-confirm";
-function Column({ column,createNewCard,deleteColumnDetails }) {
+import { cloneDeep } from "lodash";
+import { toast } from "react-toastify";
+import { createNewCardApi, deleteColumnDetailAPIs } from "apis";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectCurrentActiveBoard,
+  updateCurrentActiveBoard,
+} from "reduxStore/activeBoard/activeBoardSlice";
+function Column({ column }) {
   const {
     attributes,
     listeners,
@@ -33,6 +41,9 @@ function Column({ column,createNewCard,deleteColumnDetails }) {
     isDragging,
   } = useSortable({ id: column._id, data: { ...column } });
 
+  const dispatch = useDispatch();
+
+  const board = useSelector(selectCurrentActiveBoard);
   const dndKitColumnStyle = {
     // Nếu sử dụng Transform như doc thì sẽ lỗi kiểu stretch
     // https://github.com/clauderic/dnd-kit/issues/117
@@ -45,7 +56,7 @@ function Column({ column,createNewCard,deleteColumnDetails }) {
   };
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  const orderCard = column.cards
+  const orderCard = column.cards;
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -64,32 +75,73 @@ function Column({ column,createNewCard,deleteColumnDetails }) {
     if (!openNewCardForm) return;
 
     const newCardData = {
-      title : newCardTitile,
-      columnId : column._id
-    }
+      title: newCardTitile,
+      columnId: column._id,
+    };
+    //Call api create newCard and restate board
 
-    await createNewCard(newCardData)
+    const createdCard = await createNewCardApi({
+      ...newCardData,
+      boardId: board._id,
+    })
+      .then()
+      .catch(() => {
+        toast.error("THêm thất bại");
+      });
+    console.log("createdCard : ", createdCard);
+
+    // Cật nhật lại state Board
+
+    const newBoard = cloneDeep(board);
+    const columnToUpdate = newBoard.columns.find(
+      (column) => column._id === createdCard?.data.columnId
+    );
+    if (columnToUpdate) {
+      // Nếu card là rỗng thì column mặc định sẽ có một card-placeorder
+      if (columnToUpdate.cards.some((card) => card.FE_PlaceholderCard)) {
+        columnToUpdate.cards = [createdCard?.data];
+        columnToUpdate.cardOrderIds = [createdCard?.data?._id];
+      } else {
+        columnToUpdate.cards.push(createdCard?.data);
+        columnToUpdate.cardOrderIds.push(createdCard?.data?._id);
+      }
+    }
+    // setboard(newBoard);
+    dispatch(updateCurrentActiveBoard(newBoard));
     setNewCardTitle("");
     toggleOpenNewCard();
   };
 
-
-  // Xoá một column 
+  // Xoá một column
   const confirm = useConfirm();
-  const handleDeleteColumn =async () =>{
+  const handleDeleteColumn = async () => {
     confirm({
-      title : "Delete Column",
-      description : "This action will delete your column and card. Are you sure?",
-      
-      allowClose : false,
-      dialogProps : {maxWidth : 'xs'},
-      cancellationButtonProps : {color : 'inherit'},
-      confirmationButtonProps : {color : 'secondary', variant : 'outlined'},
-    }).then(()=>{
-      deleteColumnDetails(column._id)
-    }).catch()
+      title: "Delete Column",
+      description:
+        "This action will delete your column and card. Are you sure?",
+
+      allowClose: false,
+      dialogProps: { maxWidth: "xs" },
+      cancellationButtonProps: { color: "inherit" },
+      confirmationButtonProps: { color: "secondary", variant: "outlined" },
+    })
+      .then(() => {
+        // Xoá column trên UI
+        const newBoard = { ...board };
+        newBoard.columns = newBoard.columns.filter((c) => c._id !== column._id);
+        newBoard.columnOrderIds = newBoard.columnOrderIds.map(
+          (c) => c !== column._id
+        );
+        //  setboard(newBoard)
+        dispatch(updateCurrentActiveBoard(newBoard));
+
+        deleteColumnDetailAPIs(column._id).then((res) => {
+          toast.success(res?.message);
+        });
+      })
+      .catch();
     //=> "confirm" | "cancel" | "natural" | "unmount"
-  }
+  };
   return (
     <div ref={setNodeRef} style={dndKitColumnStyle} {...attributes}>
       <Box
@@ -142,12 +194,14 @@ function Column({ column,createNewCard,deleteColumnDetails }) {
               onClose={handleClose}
               onClick={handleClose}
             >
-              <MenuItem onClick={toggleOpenNewCard}
-              sx={{
-                "&:hover" : { color : 'success.light',
-                  "& .add-icon"  : { color : 'success.light'}
-                }
-              }}
+              <MenuItem
+                onClick={toggleOpenNewCard}
+                sx={{
+                  "&:hover": {
+                    color: "success.light",
+                    "& .add-icon": { color: "success.light" },
+                  },
+                }}
               >
                 <ListItemIcon>
                   <AddCard className="add-icon" fontSize="small" />
@@ -173,12 +227,16 @@ function Column({ column,createNewCard,deleteColumnDetails }) {
                 <ListItemText>Coppy</ListItemText>
               </MenuItem>
               <Divider />
-              <MenuItem onClick={handleDeleteColumn} sx={{
-                "&:hover" : { color : 'warning.dark',
-                  "& .delete-icon"  : { color : 'warning.dark'}
-                }
-              }}>
-                <ListItemIcon >
+              <MenuItem
+                onClick={handleDeleteColumn}
+                sx={{
+                  "&:hover": {
+                    color: "warning.dark",
+                    "& .delete-icon": { color: "warning.dark" },
+                  },
+                }}
+              >
+                <ListItemIcon>
                   <DeleteIcon className="delete-icon" fontSize="small" />
                 </ListItemIcon>
                 <ListItemText>Delete this column</ListItemText>
@@ -221,13 +279,13 @@ function Column({ column,createNewCard,deleteColumnDetails }) {
             </Box>
           ) : (
             <Box
-              
-              sx={{       
+              sx={{
                 borderRadius: "6px",
                 height: "fit-content",
-                bgcolor: (theme) => theme.palette.mode === "dark" ? "#333643" : "#EBECF0",
+                bgcolor: (theme) =>
+                  theme.palette.mode === "dark" ? "#333643" : "#EBECF0",
                 display: "flex",
-                
+
                 gap: 1,
               }}
             >
@@ -236,22 +294,31 @@ function Column({ column,createNewCard,deleteColumnDetails }) {
                 label="Card title..."
                 variant="outlined"
                 autoFocus
-                data-no-dnd='true'
+                data-no-dnd="true"
                 type="text"
                 size="small"
                 sx={{
                   "& label": { color: "text.primary" },
                   "& input": {
                     color: (theme) => theme.palette.primary.main,
-                    bgcolor: (theme) => theme.palette.mode === "dark" ? "#333643" : "white",
+                    bgcolor: (theme) =>
+                      theme.palette.mode === "dark" ? "#333643" : "white",
                   },
-                  "& label.Mui-focused": { color : theme => theme.palette.primary.main },
+                  "& label.Mui-focused": {
+                    color: (theme) => theme.palette.primary.main,
+                  },
                   "& .MuiOutlinedInput-root": {
-                    "& fieldset": { borderColor: theme => theme.palette.primary.main },
-                    "&:hover fieldset": { borderColor: theme => theme.palette.primary.main },
-                    "&.Mui-focused fieldset": { borderColor: theme => theme.palette.primary.main },
+                    "& fieldset": {
+                      borderColor: (theme) => theme.palette.primary.main,
+                    },
+                    "&:hover fieldset": {
+                      borderColor: (theme) => theme.palette.primary.main,
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: (theme) => theme.palette.primary.main,
+                    },
                   },
-                  '& .MuiOutlinedInput-input' : { borderRadius : 1}
+                  "& .MuiOutlinedInput-input": { borderRadius: 1 },
                 }}
                 value={newCardTitile}
                 onChange={(e) => {
@@ -262,12 +329,11 @@ function Column({ column,createNewCard,deleteColumnDetails }) {
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  gap : 1,
-                  
+                  gap: 1,
                 }}
               >
                 <Button
-                  data-no-dnd='true'
+                  data-no-dnd="true"
                   variant="contained"
                   color="success"
                   size="small"
@@ -285,7 +351,7 @@ function Column({ column,createNewCard,deleteColumnDetails }) {
                   Add
                 </Button>
                 <CloseIcon
-                data-no-dnd
+                  data-no-dnd
                   onClick={() => {
                     toggleOpenNewCard();
                     setNewCardTitle("");

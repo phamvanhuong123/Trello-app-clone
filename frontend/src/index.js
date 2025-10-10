@@ -10,17 +10,24 @@ import theme from "./theme";
 import { ToastContainer } from "react-toastify";
 import { ConfirmProvider } from "material-ui-confirm";
 
+import { Provider } from "react-redux";
+import { store } from "./reduxStore/store";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <>
-    <ThemeProvider theme={theme}>
-      <ConfirmProvider>
-        <CssBaseline />
-        <App />
-        <ToastContainer position="bottom-left" theme="colored" autoClose={2000} />
-      </ConfirmProvider>
-      
-    </ThemeProvider>
+    <Provider store={store}>
+      <ThemeProvider theme={theme}>
+        <ConfirmProvider>
+          <CssBaseline />
+          <App />
+          <ToastContainer
+            position="bottom-left"
+            theme="colored"
+            autoClose={2000}
+          />
+        </ConfirmProvider>
+      </ThemeProvider>
+    </Provider>
   </>
 );
 

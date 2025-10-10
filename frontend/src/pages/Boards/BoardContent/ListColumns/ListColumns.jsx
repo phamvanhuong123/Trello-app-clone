@@ -10,27 +10,62 @@ import {
 import { useState } from "react";
 import { TextField } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import { genratePlaceholderCard } from "utils/formatter";
+import { cloneDeep } from "lodash";
+import { useDispatch, useSelector } from "react-redux";
 
-function ListColumns({ columns, createNewColumn, createNewCard,deleteColumnDetails }) {
+import { selectCurrentActiveBoard,updateCurrentActiveBoard } from "reduxStore/activeBoard/activeBoardSlice";
+import { createNewColumnApi } from "apis";
+function ListColumns({ columns, createNewCard }) {
+  const dispatch = useDispatch();
+
+  const board = useSelector(selectCurrentActiveBoard);
   const [openNewColumnForm, setOpenNewColumnForm] = useState(false);
   const [newColumnTitile, setNewColumnTitle] = useState("");
   const toggleOpenNewColumn = () => {
     setOpenNewColumnForm(!openNewColumnForm);
   };
   const addNewColumn = async () => {
+    
     if (!newColumnTitile) {
-      // console.error("Khong co gia tri")
       return;
     }
     // Tạo dữ liệu để gọi api
     const newColumnData = {
       title: newColumnTitile,
     };
-    // Goi api o day
-    await createNewColumn(newColumnData);
+ 
+
+    //Call api create newColumn and restate board
+    const createdColumn = await createNewColumnApi({
+          ...newColumnData,
+          boardId: board._id,
+        });
+    
+        // Khi tạo một column mới thì chưa có card, nên cần thêm một Card rỗng
+        createdColumn.data.cards = [genratePlaceholderCard(createdColumn.data)];
+        createdColumn.data.cardOrderIds = [
+          genratePlaceholderCard(createdColumn.data)._id,
+        ];
+    
+        // Cật nhật lại state Board
+        // Phía frontend phải tự state lại bên phía frontend thay gọi lại api fetchBoardDetailsAPIs.
+        // Cách này tuỳ thuộc vào từng dự án, có nơi backend sẽ trả về toàn bộ board mới luôn dù đây có là api tạo column hay tạo card đi nữa => trong trường hợp này FE làm nhàn hơn
+    
+    
+        // Nếu newBoard = { ...board } (shallowcoppy) thì sẽ bị lỗi do redux không thay đổi giá trị tại khi newBoard.columns.push(createdColumn.data); thì bên phía redux cũng thêm vì nó là tham chiếu
+        // const newBoard = { ...board };
+        const newBoard = cloneDeep(board);
+        newBoard.columns.push(createdColumn.data);
+    
+        newBoard.columnOrderIds.push(createdColumn?.data?._id);
+        // setboard(newBoard);
+        dispatch(updateCurrentActiveBoard(newBoard))
     toggleOpenNewColumn();
     setNewColumnTitle("");
   };
+
+
   return (
     //  //item sẽ phải được lưu dưới dạng ["id_1", "id_2", "id_3"] chứ không phải [id:"id_1",id:"id_2",id:"id_3"]
     // https://github.com/clauderic/dnd-kit/issues/183#issuecomment-812569512
@@ -55,7 +90,6 @@ function ListColumns({ columns, createNewColumn, createNewCard,deleteColumnDetai
             key={column?._id}
             column={column}
             createNewCard={createNewCard}
-            deleteColumnDetails={deleteColumnDetails}
           />
         ))}
         {/* <Column />
