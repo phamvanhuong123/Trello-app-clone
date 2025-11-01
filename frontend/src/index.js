@@ -12,9 +12,11 @@ import { ConfirmProvider } from "material-ui-confirm";
 
 import { Provider } from "react-redux";
 import { store } from "./reduxStore/store";
+import {BrowserRouter} from 'react-router-dom'
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <>
+   <BrowserRouter basename="/">
     <Provider store={store}>
       <ThemeProvider theme={theme}>
         <ConfirmProvider>
@@ -28,6 +30,7 @@ root.render(
         </ConfirmProvider>
       </ThemeProvider>
     </Provider>
+   </BrowserRouter>
   </>
 );
 

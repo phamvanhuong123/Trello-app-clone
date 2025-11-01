@@ -62,7 +62,6 @@ const pushCardOrderIds = async (card) => {
   catch (error) {throw new Error(error)}
 }
 
-
 const update = async (id, updateData) => {
   try {
 

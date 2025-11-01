@@ -17,17 +17,19 @@ import {
 import { cloneDeep } from "lodash";
 import { fetchBoardDetailApi, updateCurrentActiveBoard,selectCurrentActiveBoard } from "reduxStore/activeBoard/activeBoardSlice";
 import { useDispatch, useSelector } from "react-redux";
-
+import {useParams} from 'react-router-dom'
 function Board() {
   const dispatch = useDispatch();
 
   const board = useSelector(selectCurrentActiveBoard);
 
+  const {boardId} = useParams();
+  console.log(boardId)
   useEffect(() => {
-    const boardId = "68a085e73594206b22a61834";
+    
     // call api
     dispatch(fetchBoardDetailApi(boardId))
-  }, [dispatch]); 
+  }, [dispatch,boardId]); 
 
  
  
