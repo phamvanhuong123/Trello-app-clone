@@ -41,7 +41,8 @@ function ListColumns({ columns, createNewCard }) {
           ...newColumnData,
           boardId: board._id,
         });
-    
+        console.log(createdColumn)
+        if(typeof createdColumn === 'undefined') return
         // Khi tạo một column mới thì chưa có card, nên cần thêm một Card rỗng
         createdColumn.data.cards = [genratePlaceholderCard(createdColumn.data)];
         createdColumn.data.cardOrderIds = [
@@ -61,8 +62,8 @@ function ListColumns({ columns, createNewCard }) {
         newBoard.columnOrderIds.push(createdColumn?.data?._id);
         // setboard(newBoard);
         dispatch(updateCurrentActiveBoard(newBoard))
-    toggleOpenNewColumn();
-    setNewColumnTitle("");
+        toggleOpenNewColumn();
+        setNewColumnTitle("");
   };
 
 
