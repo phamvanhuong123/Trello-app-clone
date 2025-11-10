@@ -333,6 +333,7 @@ function Column({ column }) {
                 }}
               >
                 <Button
+                  className="intercepter-loading"
                   data-no-dnd="true"
                   variant="contained"
                   color="success"

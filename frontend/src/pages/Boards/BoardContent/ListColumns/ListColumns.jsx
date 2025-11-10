@@ -167,6 +167,7 @@ function ListColumns({ columns, createNewCard }) {
               }}
             >
               <Button
+                className="intercepter-loading"
                 variant="contained"
                 color="success"
                 size="small"

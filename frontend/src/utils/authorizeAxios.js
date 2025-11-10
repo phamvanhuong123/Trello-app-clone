@@ -1,5 +1,6 @@
 import axios from "axios";
 import { toast } from "react-toastify";
+import { intercepterLoadingElement } from "./formatter";
 
 // Khởi tạo đối tượng axios (authorizedAxiosInstance) mục đích custom và cấu hình chung cho dự án
 let authorizedAxiosInstance = axios.create()
@@ -14,6 +15,8 @@ authorizedAxiosInstance.defaults.withCredentials = true
 
 // Add a request interceptor : can thiệp vào request api
 authorizedAxiosInstance.interceptors.request.use( (config) => {
+    //Kĩ thuật chặn spam click khi người dùng gọi api (Khi người dùng gọi api)
+    intercepterLoadingElement(true)
     // Do something before request is sent
     return config;
   },  (error) => {
@@ -27,15 +30,20 @@ authorizedAxiosInstance.interceptors.request.use( (config) => {
 
 // Add a response interceptor : can thiệp vào response api
 authorizedAxiosInstance.interceptors.response.use(function onFulfilled(response) {
-    // Any status code that lie within the range of 2xx cause this function to trigger
-    // Do something with response data
-    console.log(response)
+    
+    //Kĩ thuật chặn spam click gọi api (Khi api được trả về)
+    intercepterLoadingElement(false)
 
     return response;
   }, function onRejected(error) {
     // Any status codes that falls outside the range of 2xx cause this function to trigger
     // Xử lí tập trung phần hiển thị thông báo lỗi trả về từ mọi API ở đây
     //conslole.log(error) là biết cấu trúc của nó
+    
+    //Kĩ thuật chặn spam click gọi api (Khi api được trả về)
+
+    intercepterLoadingElement(false)
+
 
     let errorMessage = error.message
     if(error?.response?.data?.message){
@@ -44,7 +52,6 @@ authorizedAxiosInstance.interceptors.response.use(function onFulfilled(response)
 
     if(error?.response?.status !== 410){
       toast.error(errorMessage)
-
       return 
     }
 
